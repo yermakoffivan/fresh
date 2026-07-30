@@ -11,7 +11,7 @@ For live updates on Fresh, [follow me on X](https://x.com/TheNoamLewis).
 * **Restart an exited terminal in place** - the status bar offers `⟳ Restart terminal` (or `⟳ Resume claude`) and the process comes back in the same buffer, below the existing scrollback, with a coding agent rejoining its conversation. The tab reads `claude (exited)` instead of an exit line in the output, and terminal tab names now survive an editor restart.
   * If you have customized your status bar, open Settings → **Status Bar** and move **Terminal Restart** from *Available* to *Included* (`Shift+→`) under Left or Right.
 * **Line-ending indicators** - `↵` at every line break and `␍` for the CR half of a CRLF, both off by default (#2798, requested by @akarinotomoshibi).
-* **Scrollbar markers for plugins** - `editor.setScrollbarMarkers` paints marks on the scrollbar track; live-diff hunks and Markdown headings now use it (#2713, requested by @RetributionByRevenue).
+* **Scrollbar markers for plugins** - `editor.setScrollbarMarkers` paints marks on the scrollbar track; git-gutter hunks, live-diff hunks and Markdown headings now use it (#2713, requested by @RetributionByRevenue).
 * **File Explorer sticky parents** - a nested folder's expanded ancestors stay stacked at the top of the sidebar while you scroll (#2705, by @asukaminato0721).
 * **More graphics, docs and build-file grammars** - GLSL `.glslf`/`.glslv`, Wavefront `.obj`, Doxygen, Windows `.rc`, pkg-config, `.cmake.in` and `CMakeCache.txt` (by @asukaminato0721).
 * **Broader LaTeX ecosystem highlighting** - TeX packages/classes, generated `.aux`/`.toc`, BibLaTeX, ConTeXt, BibTeX and `.bst`, plus `latexmkrc` (by @asukaminato0721).
