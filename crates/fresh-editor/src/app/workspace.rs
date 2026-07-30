@@ -1521,6 +1521,10 @@ impl crate::app::window::Window {
                         buf_state.line_wrap_override = Some(line_wrap);
                         buf_state.viewport.line_wrap_enabled = line_wrap;
                     }
+                    if let Some(highlight_current_line) = file_state.highlight_current_line {
+                        buf_state.highlight_current_line_override = Some(highlight_current_line);
+                        buf_state.highlight_current_line = highlight_current_line;
+                    }
                     buf_state.plugin_state = file_state.plugin_state.clone();
                     if let Some(state) = __buffers_mut.get_mut(&buffer_id) {
                         // Re-apply the explicit per-buffer virtual-space
@@ -1555,6 +1559,11 @@ impl crate::app::window::Window {
                             let configured = state.buffer_settings.whitespace;
                             state.buffer_settings.whitespace_override = Some(whitespace_visible);
                             state.buffer_settings.apply_whitespace_override(configured);
+                        }
+                        if let Some(highlight_occurrences) = file_state.highlight_occurrences {
+                            state.buffer_settings.highlight_occurrences_override =
+                                Some(highlight_occurrences);
+                            state.reference_highlight_overlay.enabled = highlight_occurrences;
                         }
                         buf_state.folds.clear(&mut state.marker_list);
                         for fold in &file_state.folds {
@@ -2008,6 +2017,8 @@ impl crate::app::window::Window {
             fold_indicators: None,
             use_tabs: None,
             whitespace_indicators: None,
+            highlight_current_line: None,
+            highlight_occurrences: None,
             plugin_state: std::collections::HashMap::new(),
             folds: Vec::new(),
         };
@@ -3143,6 +3154,10 @@ fn serialize_split_view_state(
                 whitespace_indicators: buffers
                     .get(buffer_id)
                     .and_then(|state| state.buffer_settings.whitespace_override),
+                highlight_current_line: buf_state.highlight_current_line_override,
+                highlight_occurrences: buffers
+                    .get(buffer_id)
+                    .and_then(|state| state.buffer_settings.highlight_occurrences_override),
                 plugin_state: buf_state.plugin_state.clone(),
                 folds,
             },
