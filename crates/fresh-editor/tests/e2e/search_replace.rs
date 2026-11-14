@@ -4471,9 +4471,12 @@ fn test_search_replace_tracked_symlinks_are_searched_once() {
     fs::remove_file(project_root.join("was_link.txt")).unwrap();
     fs::write(project_root.join("was_link.txt"), "zqxneedle now a file\n").unwrap();
 
+    // Tall enough for all four result groups at once: the negative assertion
+    // below is about the whole result set, and a window that can only show
+    // part of it makes "not on screen" mean "not scrolled into view yet".
     let mut harness = EditorTestHarness::with_config_and_working_dir(
         120,
-        30,
+        44,
         Default::default(),
         project_root.clone(),
     )
@@ -4482,13 +4485,36 @@ fn test_search_replace_tracked_symlinks_are_searched_once() {
 
     open_search_replace_via_palette(&mut harness);
     harness.type_text("zqxneedle").unwrap();
+    // The count reaches "5 / 4" while the list is still arriving group by
+    // group, so wait for the rows to stop changing as well: the negative
+    // assertion below is about the whole result set, and asserting it
+    // against a half-drawn list is a race (CONTRIBUTING.md Testing §3).
+    //
+    // Stability rather than naming each expected row, because one of the
+    // four files lies outside the project and is listed by absolute path.
+    // That path is as long as the temp dir holding it, so on a 120-column
+    // screen it truncates — and matching its text would quietly make this
+    // wait depend on `$TMPDIR`, which is short on Linux and
+    // `/var/folders/...` on macOS.
     harness
-        .wait_until(|h| h.screen_to_string().contains("(5 matches / 4 files)"))
+        .wait_until_stable(|h| h.screen_to_string().contains("(5 matches / 4 files)"))
         .unwrap();
+    // Not vacuous: the results really did render, so the absence asserted
+    // below is an absence from a drawn list.
     harness
         .wait_until(|h| h.screen_to_string().contains("real.txt:1 - zqxneedle here"))
         .unwrap();
-    harness.assert_screen_not_contains("link.txt");
+    // `link.txt` points at `real.txt`, which is listed, so the link is never
+    // a result of its own. Anchored on the space that precedes every file
+    // name the list renders: a bare `contains("link.txt")` also matches the
+    // legitimate `was_link.txt` rows, which is what made this assertion pass
+    // or fail depending on how much of the list had been drawn.
+    let screen = harness.screen_to_string();
+    assert!(
+        !screen.contains(" link.txt"),
+        "link.txt is the tracked symlink to real.txt and must not be listed \
+         as a result of its own.\nScreen:\n{screen}"
+    );
 
     harness.send_key(KeyCode::Tab, KeyModifiers::NONE).unwrap();
     harness.type_text("PIN").unwrap();
